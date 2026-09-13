@@ -45,7 +45,33 @@
 }
   </style>
 </head>
-<body>
+<body> 
+    <div id="loginSection" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 400px; padding: 0 15px;">
+    <div class="card p-4 mx-auto border border-dark shadow-sm" style="width: 460px; max-width: 90%; border-radius: 15px ; padding: 50px !important;  border: 1px solid #ced4da;">
+          
+      <h3 class="text-center text-primary fw-bold mb-4">Sign In</h3>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="mb-3 text-start">
+          <label for="loginEmail" class="form-label fw-semibold">Email Address</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="shreyasen673@gmail.com" required />
+        </div>
+        <div class="mb-3 text-start">
+          <label for="loginPassword" class="form-label fw-semibold">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="1234" required />
+        </div>
+       <button type="submit" 
+        class="btn btn-info w-100 fw-bold mt-4" 
+         style="transition: all 0.3s ease;" 
+     onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';" 
+     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+  👉 Click here
+</button>
+         
+      </form>
+      <div id="errorMsg" class="alert alert-danger mt-3 d-none text-center"></div>
+    </div>
+  </div>
+  <div id="mainPortfolio" style="display: none;">
     <nav class="navbar navbar-expand-sm  navbar-dark border-bottom" style="background-color: #397aa4 ;">
         <div class="container-fluid  justify-content-end">
             <ul class="navbar-nav">
@@ -64,8 +90,6 @@
             </ul>
         </div>
     </nav>
-    </a>
-</div>
     <div class="container-fluid p-5  text-dark shadow-sm" style="background-color: #397aa4;">
         <div class="row align-items-center justify-content-center">
             <!-- Left Side: Picture Box -->
@@ -325,11 +349,56 @@
   </button>
 </div>
         </form>
-
-      
-
     </div>
   </div>
 </section>
+</div>
+   <script>
+window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('http://localhost:5000/api/get-credentials');
+        const data = await res.json();
+        
+        if (data.email) {
+            document.getElementById('loginEmail').placeholder = data.email;
+        }
+        if (data.password) {
+            document.getElementById('loginPassword').placeholder = data.password;
+        }
+    } catch (err) {
+        console.log("Failed to fetch credentials placeholder:", err);
+    }
+});
+async function handleLogin(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const errorMsg = document.getElementById('errorMsg');
+
+    try {
+        const response = await fetch('http://localhost:5000/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            errorMsg.classList.add('d-none');
+            document.getElementById('loginSection').style.setProperty('display', 'none', 'important');
+            document.getElementById('mainPortfolio').style.setProperty('display', 'block', 'important');
+        } else {
+            errorMsg.classList.remove('d-none');
+            errorMsg.innerText = data.message || "Login failed!";
+        }
+    } catch (err) {
+        errorMsg.classList.remove('d-none');
+        errorMsg.innerText = "Server error! Make sure node server.js is running.";
+    }
+}
+</script>
+</script>
 </body> 
 </html>
